@@ -13,13 +13,13 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 📌 Vérifie si le dossier `uploads` existe, sinon le crée
+//  Vérifie si le dossier `uploads` existe, sinon le crée
 const uploadDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
 }
 
-// 📌 Configuration Multer pour l’upload
+//  Configuration Multer pour l’upload
 const storage = multer.diskStorage({
     destination: "uploads/",
     filename: (req, file, cb) => {
@@ -33,7 +33,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// 📌 Route pour téléverser une image avec protection
+//  Route pour téléverser une image avec protection
 app.post("/api/images/upload", upload.single("image"), async (req, res) => {
     try {
         if (!req.file) {
@@ -43,7 +43,7 @@ app.post("/api/images/upload", upload.single("image"), async (req, res) => {
         const inputPath = path.join(__dirname, "uploads", req.file.filename);
         const outputPath = path.join(__dirname, "uploads", "protected_" + req.file.filename);
 
-        // 📌 Vérifier si le fichier existe et si c’est bien une image
+        //  Vérifier si le fichier existe et si c’est bien une image
         if (!fs.existsSync(inputPath)) {
             return res.status(400).json({ message: "Le fichier n'existe pas après l'upload." });
         }
@@ -53,7 +53,7 @@ app.post("/api/images/upload", upload.single("image"), async (req, res) => {
             return res.status(400).json({ message: "Format d'image invalide ou corrompu !" });
         }
 
-        // 📌 Appliquer une transformation uniquement si le fichier est valide
+        //  Appliquer une transformation uniquement si le fichier est valide
         await sharp(inputPath)
             .modulate({ brightness: 1.02, saturation: 0.98 }) 
             .toFile(outputPath);
@@ -69,7 +69,7 @@ app.post("/api/images/upload", upload.single("image"), async (req, res) => {
     }
 });
 
-// 📌 Route pour récupérer la liste des images (triées du plus récent au plus ancien)
+//  Route pour récupérer la liste des images (triées du plus récent au plus ancien)
 app.get("/api/images", (req, res) => {
     fs.readdir("uploads/", (err, files) => {
         if (err) {
@@ -83,10 +83,10 @@ app.get("/api/images", (req, res) => {
     });
 });
 
-// 📌 Servir les images depuis `/uploads`
+//  Servir les images depuis `/uploads`
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// 📌 Route pour télécharger une image (ajoute un filigrane invisible)
+//  Route pour télécharger une image (ajoute un filigrane invisible)
 app.get("/api/images/download/:filename", async (req, res) => {
     try {
         const filename = req.params.filename;
@@ -103,7 +103,7 @@ app.get("/api/images/download/:filename", async (req, res) => {
             return res.status(500).json({ message: "Fichier watermark introuvable." });
         }
 
-        // 📌 Ajout du filigrane avant le téléchargement
+        //  Ajout du filigrane avant le téléchargement
         await sharp(inputPath)
             .composite([{ input: watermarkPath, gravity: "southeast", blend: "overlay" }])
             .toFile(outputPath);
@@ -122,5 +122,5 @@ app.get("/api/images/download/:filename", async (req, res) => {
 
 
 app.listen(PORT, () => {
-    console.log(`🚀 Serveur en cours d'exécution sur http://localhost:${PORT}`);
+    console.log(` Serveur en cours d'exécution sur http://localhost:${PORT}`);
 });
